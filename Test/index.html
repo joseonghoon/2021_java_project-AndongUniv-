@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>
+  일별 박스오피스
+</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&display=swap" rel="stylesheet">
+<style>
+	.zz{
+		background-color : #F2FFFF;
+		font-family: 'Nanum Pen Script', cursive;
+		margin-left : 100px;
+		margin-right : 100px;
+		border : 2px solid rgba(0, 0, 255, 0.2);
+		height : 935px;;
+		font-size : 20px;
+		}
+	.box1 {
+		border-radius: 50px;
+		border: 2px solid rgba(0, 0, 255, 0.2);
+		background-color :  rgba(0, 0, 255, 0.1);
+		padding: 10px; 
+		margin : 10px auto;
+		width: 600px;
+		height: 20px; 
+		color : black;
+		text-align : center;
+		font-size : 25px;
+	}
+	.box2 {		 
+		padding: 10px; 
+		margin : 10px auto;
+		width: 460px; 
+		text-align : center;
+	} 
+	.box4 {
+		margin : 10px;
+		padding: 10px auto;
+		font-size : 14px;
+		color : red;
+		text-align : center;
+	}
+	#msgimg {
+		width : 400px; 
+		margin : 10px;
+		padding: 10px;  
+		border: 1px solid #73AD21;
+		text-align : center;
+	}
+	 
+	.card {
+		width : 60px;
+		height :60px;
+		border: 2px solid #73AD21;
+		border-radius: 5px;
+		margin: 5px auto;
+		padding-top:6px;
+		font-size: 25px;
+		float: left;
+	}
+	.cardClear {
+		clear : both;
+	}
+	.box3{
+		margin : 2px auto;
+		padding : 10px;
+		width : 400px;
+		height : 250px;
+		color : blue;
+		text-align : left;
+		border : 2px double red;
+		}
+	img{
+		height : 250px;
+		width : 400px;
+		}
+	.box3 > h1{
+		text-align : center;
+	}
+	#msg {
+		border-radius: 5px;
+		border: 2px solid gray;
+		padding: 10px;
+		padding-left: 20px;
+		margin : 10px auto;
+		width: 500px;
+		height: 430px; 
+		font-size:18px;
+		text-align:left;
+		background-color : white;
+	}
+		input[type=text]{
+			 width : 32px;
+		}
+	#selDay, #selMon, #txtYear, #bt1, #repNationCd, #weekGb, #k{
+				background-color : white;
+				border: 2px solid black;
+				}
+	
+	a:link, a:visited {
+				color : black;
+				}
+			a:hover, a:active{
+				color : rgba(0, 0, 255, 0.2);
+				}
+	p {
+		color : red ;
+	}
+</style>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>  
+   <script>
+ function init(){
+   var today=new Date();
+   $("#txtYear").val(today.getFullYear());
+   
+   var mon=today.getMonth()+1;
+   if(mon<10)
+	mon='0'+mon;
+$("#selMon").val(mon);
+
+	var day=today.getDate()-1;
+	if(day<10)
+	day='0'+day;
+$("#selDay").val(day);
+   }
+   
+   function show(movieCd){
+				var url = "http://www.kobis.or.kr/kobisopenapi/webservice/rest/movie/searchMovieInfo.xml?key=f5eef3421c602c6cb7ea224104795888&movieCd="
+				url = url + movieCd;
+				$(".box3").text("");
+				
+				console.log(url);
+				
+				$.ajax({
+					type : "GET",
+					url : url,
+					dataType : "xml",
+					success : function(data){
+						var str ="";
+						str = str + "<h1>"+$(data).find("movieNm").text() + "</h1><br>";
+						str = str +"장르: "+ $(data).find("genreNm").text()+"<br>";
+						str = str +"관람 등급: "+ $(data).find("watchGradeNm").text()+"<br>";
+						str = str +"감독: "+ $(data).find("directors").text()+"<br>";
+						str = str +"제작 국가: "+ $(data).find("nations").text()+"<br>";
+						
+						
+						$(".box3").append(str);
+					},
+					error:function(){}
+				});
+			}
+				
+   
+   $(document).ready(function(){
+   init();
+
+   
+   $("#bt1").click(function(){
+   var url="http://kobis.or.kr/kobisopenapi/webservice/rest/boxoffice/searchDailyBoxOfficeList.xml?key=f5eef3421c602c6cb7ea224104795888";
+   url= url+"&targetDt="+$("#txtYear").val()+$("#selMon").val()+$("#selDay").val();
+   url= url+"&repNationCd="+$("#repNationCd").val();
+		//console.log(url);
+		$.ajax({
+			type:"GET",
+			url:url,
+			dataType:"xml",
+			success:function(data){
+				var str="";
+				
+				$(data).find("dailyBoxOffice").each(function(){ 
+					str = str + "<a href='#' onclick='javascript:show(" + $(this).find("movieCd").text()+")'>";
+					str=str+ $(this).find("rank").text()+"위: ";
+						
+						str=str+$(this).find("movieNm").text()+ "</a>"+" / 누적 관객수: ";
+						str=str+$(this).find("audiAcc").text()+"명 / 영화 개봉일: "+$(this).find("openDt").text()+"<br>";
+						
+					str=str+"<br>";
+					
+				
+				});
+					str= str+"(제목 클릭시 상세정보 확인가능)"
+				$("#msg").append(str);
+			},
+			error:function(){}
+		});
+		
+		
+		
+		});
+   
+   });
+   function showClear()
+			{
+				if (self.name != 'reload') {
+					self.name = 'reload';
+					self.location.reload(true);
+					}
+				else self.name = ''; 
+				//구글링을 통해 코드를 찾았습니다. 
+				//페이지 새로고침 코드
+			}
+   </script>
+
+</head>
+<body>
+<div class="zz">
+<form name="myform">
+	<div class="box1">
+		일별 박스오피스
+	</div>
+	<div class="box2">
+		<input type="text" name="txtYear" id="txtYear" size="6"> 년
+		<select id="selMon">
+			<option value="01">1월</option> 
+			<option value="02">2월</option> 
+			<option value="03">3월</option> 
+			<option value="04">4월</option> 
+			<option value="05">5월</option> 
+			<option value="06">6월</option> 
+			<option value="07">7월</option> 
+			<option value="08">8월</option> 
+			<option value="09">9월</option> 
+			<option value="10">10월</option> 
+			<option value="11">11월</option> 
+			<option value="12">12월</option> 
+		</select>
+		<select id="selDay">
+			<option value="01">1일</option> 
+			<option value="02">2일</option> 
+			<option value="03">3일</option> 
+			<option value="04">4일</option> 
+			<option value="05">5일</option> 
+			<option value="06">6일</option> 
+			<option value="07">7일</option> 
+			<option value="08">8일</option> 
+			<option value="09">9일</option> 
+			<option value="10">10일</option> 
+			<option value="11">11일</option> 
+			<option value="12">12일</option>
+			<option value="13">13일</option>
+			<option value="14">14일</option> 
+			<option value="15">15일</option> 
+			<option value="16">16일</option>
+			<option value="17">17일</option>
+			<option value="18">18일</option> 
+			<option value="19">19일</option> 
+			<option value="20">20일</option>
+			<option value="21">21일</option>
+			<option value="22">22일</option>
+			<option value="23">23일</option>
+			<option value="24">24일</option>
+			<option value="25">25일</option>
+			<option value="26">26일</option>
+			<option value="27">27일</option>
+			<option value="28">28일</option>
+			<option value="29">29일</option>
+			<option value="30">30일</option>
+			<option value="31">31일</option>
+		</select>
+		<select id="repNationCd">
+			<option value="">전체</option> 
+			<option value="K">국내 영화</option> 
+			<option value="F">해외 영화</option> 
+		</select>
+		<input type="button" value="확인" id="bt1">
+	</div> 	
+	<div id="msg">
+	</div>
+	<div class='cardClear'></div>
+	<div class="box3">
+	<img src="./img/캡처.png">
+	</div>
+	<div class="box4">
+	<input id="k" type="button" value="더블클릭시 전체 삭제" onclick="showClear();">
+	</div>
+</div>
+</form>
+</body>
+</html>
